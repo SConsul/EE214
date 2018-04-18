@@ -12,15 +12,15 @@ architecture behave of debouncer is
 		port (reset, D, CLK: in std_logic; Q: out std_logic);
 	end component;
 	
-	component slowclock is
+	component db_slowclock is
 		port (reset, fast : in std_logic; slow: out std_logic);
 	end component;
 	
 	signal ns,s : std_logic_vector(1 downto 0);
-	signal clk : std_logic;
+	signal db_clk : std_logic;
 	
 begin 
-cnt_0: slowclock port map(reset=>reset, fast=>clk_5M, slow=>clk);
+cnt_0: db_slowclock port map(reset=>reset, fast=>clk_5M, slow=>db_clk);
 
 --Resetting the FSM
 --s(0)<='0'
@@ -31,8 +31,8 @@ cnt_0: slowclock port map(reset=>reset, fast=>clk_5M, slow=>clk);
 ns(0) <= x;
 ns(1) <= ( (x and s(0)) or (x and s(1)) or (s(1) and s(0)) );
 
-y <= ns(1);
+y <= not ns(1);
 
-dff_s0: DFlipFlop port map(reset=>reset, D=>ns(0) , CLK=>clk, Q=>s(0));
-dff_s1: DFlipFlop port map(reset=>reset, D=>ns(1) , CLK=>clk, Q=>s(1));
+dff_s0: DFlipFlop port map(reset=>reset, D=>ns(0) , CLK=>db_clk, Q=>s(0));
+dff_s1: DFlipFlop port map(reset=>reset, D=>ns(1) , CLK=>db_clk, Q=>s(1));
 end behave;

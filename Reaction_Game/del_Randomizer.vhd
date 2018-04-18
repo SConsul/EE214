@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 
 entity del_Randomizer is
   port (
-			reset, start, react, CLK: in std_logic; 
+			CLK, reset, start, react: in std_logic; 
 			del: out unsigned (7 downto 0) );
 end entity del_Randomizer;
 
