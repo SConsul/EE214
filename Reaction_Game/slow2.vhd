@@ -9,7 +9,7 @@ architecture WhatDoYouCare of slow2 is
 
 signal qsig : std_logic;
 begin 
-   process (fast_clk) 
+   process (fast_clk,reset,qsig) 
    begin
 	if(reset='1') then
 		qsig <='0';
