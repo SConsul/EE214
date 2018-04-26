@@ -6,26 +6,24 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity interval_countup is
-  port (CLK, reset, start_cu_count, stop_cu_count : in std_logic;
+  port (CLK, reset, start_cu_count, stop_cu_count, zero_cu_count : in std_logic;
   		rtime: out unsigned (15 downto 0);
   		timeout: out std_logic);
 end entity;
 
 architecture countup of interval_countup is
-	type cu_RTLState is (cu_rst, cu_incr);
+	type cu_RTLState is (cu_rst, cu_incr,cu_hold);
 	signal cu_rtl_state: cu_RTLState;
 	signal cu_count, rtime_sig: unsigned (15 downto 0);
 	signal timeout_sig:std_logic;
 	constant Z : unsigned (15 downto 0) := (others => '0');
-	--Timeout of ~2s = 0000011111010000
-				  --16s = 0011111010000000
-	constant T : unsigned (15 downto 0) := (0=>'0', 1=>'0', 2=>'0', 3=>'0', 5=>'0',
-														11=>'0', 12=>'0', 13=>'0', 14=>'0', 15=>'0', others => '1');
+	--Timeout of 2000ms = 0000011111010000
+	constant T : unsigned (15 downto 0) := (4=>'1',6=>'1', 7=>'1', 8=>'1', 9=>'1', 10=>'1', others => '0');
 	
 begin
 	rtime<=rtime_sig;
 	timeout<=timeout_sig;
-	process (CLK, reset, start_cu_count, stop_cu_count, cu_rtl_state, 
+	process (CLK, reset, start_cu_count, stop_cu_count, zero_cu_count, cu_rtl_state, 
 	cu_count, rtime_sig, timeout_sig)
 		variable next_cu_rtl_state: cu_RTLState;
 		variable next_cu_count_var: unsigned (15 downto 0);
@@ -55,8 +53,12 @@ begin
 					next_cu_count_var := cu_count + 1;
 					if (stop_cu_count='1') then
 							rtime_var:=next_cu_count_var;
-							next_cu_rtl_state:=cu_rst;
+							next_cu_rtl_state:=cu_hold;
 					end if;
+				end if;
+			when cu_hold=>
+				if (zero_cu_count='1') then
+					next_cu_rtl_state:=cu_rst;
 				end if;
 		end case;
 			
